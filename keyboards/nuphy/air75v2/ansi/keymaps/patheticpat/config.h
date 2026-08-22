@@ -4,6 +4,7 @@
 #undef RGB_DEFAULT_COLOR
 #undef DEFAULT_SIDE_MODE
 #undef DEFAULT_SIDE_COLOR
+#undef DEFAULT_SIDE_STATIC_HUE
 #undef DEFAULT_SIDE_BRIGHTNESS
 #undef DEFAULT_AMBIENT_MODE
 #undef DEFAULT_AMBIENT_COLOR
@@ -18,9 +19,14 @@
 #define DEFAULT_RGB_MATRIX_BRIGHTNESS (RGB_MATRIX_VAL_STEP * 8)
 #define RGB_MATRIX_DEFAULT_VAL DEFAULT_RGB_MATRIX_BRIGHTNESS
 #define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_SOLID_COLOR
-#define RGB_DEFAULT_COLOR 15
+// Top matrix default color (red). DEFAULT_SIDE_STATIC_HUE below is pinned
+// separately so changing this no longer drags the sidelights along with it.
+#define RGB_DEFAULT_COLOR 8
 #define DEFAULT_SIDE_MODE 2
 #define DEFAULT_SIDE_COLOR 1
+// Sidelight default color, decoupled from RGB_DEFAULT_COLOR (was inheriting
+// its old value of 15 before this was set explicitly).
+#define DEFAULT_SIDE_STATIC_HUE 15
 #define DEFAULT_SIDE_BRIGHTNESS 5
 #define DEFAULT_AMBIENT_MODE 2
 #define DEFAULT_AMBIENT_COLOR 1
