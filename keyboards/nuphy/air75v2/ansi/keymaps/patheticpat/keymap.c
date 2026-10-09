@@ -3,6 +3,7 @@
 
 #include "ansi.h"
 #include QMK_KEYBOARD_H
+#include "common/config/config.h"
 
 enum custom_user_keycodes {
     RGB_DIM_KEEP_IND = SAFE_RANGE,
@@ -86,9 +87,57 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 // clang-format on
 
-// Toggle home row mods ON by default
+#define HRM_LAYER 7
+#define HRM_FLASH_MS 1500
+
+static uint32_t hrm_flash_timer  = 0;
+static bool     hrm_flash_active = false;
+static bool     hrm_init_done    = false;
+
+// Toggle home row mods ON by default, without triggering the toggle flash
 void keyboard_post_init_user(void) {
-    layer_on(7);
+    layer_on(HRM_LAYER);
+    hrm_init_done = true;
+}
+
+// Start the home row flash whenever the home row mods layer changes state
+layer_state_t layer_state_set_user(layer_state_t state) {
+    if (hrm_init_done && layer_state_cmp(state, HRM_LAYER) != layer_state_is(HRM_LAYER)) {
+        hrm_flash_timer  = timer_read32();
+        hrm_flash_active = true;
+    }
+    return state;
+}
+
+static void hrm_set_color(uint8_t row, uint8_t col) {
+    if (layer_state_is(HRM_LAYER)) {
+        user_set_rgb_color(get_led_index(row, col), 0x00, 0x80, 0x00);
+    } else {
+        user_set_rgb_color(get_led_index(row, col), 0x80, 0x00, 0x00);
+    }
+}
+
+bool rgb_matrix_indicators_user(void) {
+    if (hrm_flash_active) {
+        if (timer_elapsed32(hrm_flash_timer) < HRM_FLASH_MS) {
+            // A S D F and J K L ;
+            for (uint8_t col = 1; col <= 4; col++) {
+                hrm_set_color(3, col);
+            }
+            for (uint8_t col = 7; col <= 10; col++) {
+                hrm_set_color(3, col);
+            }
+        } else {
+            hrm_flash_active = false;
+        }
+    }
+
+    // show home row mods state on the TG(HRM_LAYER) key (Ins) while Fn is held
+    if (layer_state_is(1) || layer_state_is(3)) {
+        hrm_set_color(0, 15);
+    }
+
+    return true;
 }
 
 static uint8_t saved_rgb_mode = 0;
