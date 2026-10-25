@@ -140,6 +140,19 @@ bool rgb_matrix_indicators_user(void) {
     return true;
 }
 
+// Permissive hold only for the shift keys (F / J) so capitals stay fast.
+// For the other home row mods it turns opposite-hand rolls like "ay" or
+// "sp" into GUI+y / Alt+p, so they rely on the tapping term instead.
+bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case MT(MOD_LSFT, KC_F):
+        case MT(MOD_LSFT | MOD_RSFT, KC_J):
+            return true;
+        default:
+            return false;
+    }
+}
+
 static uint8_t saved_rgb_mode = 0;
 static hsv_t   saved_rgb_hsv;
 static bool    rgb_dimmed = false;
